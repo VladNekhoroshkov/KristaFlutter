@@ -19,9 +19,10 @@ class _DetailScreenState extends State<DetailScreen> {
       ),
       body: Column(
         children: [
-          Placeholder(fallbackHeight: 300,),
-          Text(widget.model.title),
+          Image.network(widget.model.imgUrl),
+          //Placeholder(fallbackHeight: 240,),
           Text(widget.model.subtitle),
+          Text(widget.model.info),
         ],
       ),
     );

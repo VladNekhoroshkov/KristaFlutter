@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:online_shop/screens/products.dart';
+import 'package:online_shop/screens/userProfile.dart';
+import 'package:online_shop/screens/home.dart';
+import 'package:online_shop/screens/productsCart.dart';
 
 void main() {
   runApp(MyApp());
@@ -27,39 +30,88 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demon Home Page'),
+      home: PageNavigationBar(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class PageNavigationBar extends StatefulWidget {
+  final List<Page> _pages = [
+    Page('Catalog', Icons.list_alt, ProductsScreen()),
+    Page('Profile', Icons.account_box, ProfileScreen()),
+    Page('Cart', Icons.shopping_cart, ProductsCart()),
+  ];
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  PageNavigationBar({Key key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _PageNavigationBarState createState() => _PageNavigationBarState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _PageNavigationBarState extends State<PageNavigationBar> {
+  int _currentPageIndex = 0;
+
+  void _openPage(int index) {
+    setState(() {
+      _currentPageIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-
+    List<Widget> drawerItemWidgets = widget._pages
+        .asMap()
+        .map((int index, Page page) =>
+        MapEntry<int, Widget>(index,
+            ListTile(
+              title: Text(page.title),
+              leading: Icon(page.iconData),
+              selected: _currentPageIndex == index,
+              onTap: () {
+                _openPage(index);
+                Navigator.pop(context);
+              },
+            )
+        )
+    ).values.toList();
+    drawerItemWidgets.insert(0, DrawerHeader(
+      child: Text('Drawer Header'),
+      decoration: BoxDecoration(
+        color: Colors.blue,
+      ),
+    ),);
     return Scaffold(
       appBar: AppBar(
-        title: Text("MyApp"),
+        title: Text("ProCourses"),     
+        //title: Image.asset("assets/img/logoProCourses.PNG"),
       ),
-      body: ProductsScreen(),
-    );
+      //body: ProductsScreen(),
+      body: Center(
+        child: (widget._pages[_currentPageIndex].pageBody),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: drawerItemWidgets,
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentPageIndex,
+        items: widget._pages.map((Page page) =>
+            BottomNavigationBarItem(
+              icon: Icon(page.iconData),
+              title: Text(page.title),
+            )).toList(),
+        onTap: _openPage,
+      ),);
   }
 }
+
+class Page {
+  final String title;
+  final IconData iconData;
+  final Widget pageBody;
+  Page(this.title, this.iconData, this.pageBody);
+}
+
